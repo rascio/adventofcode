@@ -1,18 +1,15 @@
 (ns advent.2018
   (:require [advent.core :as a]
-            [clojure.java.io :as io]))
+            [clojure.core.reducers :as r]))
 
 ;https://adventofcode.com/2018/day/1
-(a/defcase day1 "2018/1.input.txt"
+(a/defcase day1 "2018/1.input.txt" input
   (reduce +
-      (map #(Integer/parseInt %)
-        (line-seq (io/reader *in*)))))
+      (map #(Integer/parseInt %) input)))
 
-(a/defcase day1-part2 "2018/1.input.txt"
+(a/defcase day1-part2 "2018/1.input.txt" input
   (let [seq (cycle
-              (map
-                #(Integer/parseInt %)
-                (line-seq (io/reader *in*))))]
+              (map #(Integer/parseInt %) input))]
     (loop [[n & tail] seq
            tot 0
            history #{}]
@@ -21,5 +18,29 @@
           res
           (recur tail res (conj history res)))))))
 
-(a/defcase day2 "2018/2.input.txt"
-  (println (first (line-seq (io/reader *in*)))))
+;https://adventofcode.com/2018/day/2
+; utils
+(defn sum-pair
+  ([] [0 0])
+  ([a] a)
+  ([[p1 p2] [m1 m2]]
+   [(+ p1 m1) (+ p2 m2)]))
+(defn bool->int
+  [b]
+  (if b 1 0))
+
+
+(a/defcase day2 "2018/2.input.txt" input
+  (let [[twos threes]
+        (transduce
+          (comp
+            (map seq)
+            (map frequencies)
+            (map vals)
+            (map set)
+            (map (juxt
+                   #(bool->int (contains? % 2))
+                   #(bool->int (contains? % 3)))))
+          sum-pair
+          input)]
+    (* twos threes)))
