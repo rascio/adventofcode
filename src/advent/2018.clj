@@ -20,3 +20,6 @@
         (if (contains? history res)
           res
           (recur tail res (conj history res)))))))
+
+(a/defcase day2 "2018/2.input.txt"
+  (println (first (line-seq (io/reader *in*)))))
