@@ -8,6 +8,7 @@
       (map #(Integer/parseInt %) input)))
 
 
+
 (a/defcase day1-part2 "2018/1.input.txt" input
   (let [seq (cycle
               (map #(Integer/parseInt %) input))]
@@ -18,6 +19,8 @@
         (if (contains? history res)
           res
           (recur tail res (conj history res)))))))
+
+
 
 
 
@@ -48,6 +51,7 @@
     (* twos threes)))
 
 
+
 ;utils
 (defn diff
   ([seq1 seq2]
@@ -70,5 +74,27 @@
 
 
 
+
+
 ;https://adventofcode.com/2018/day/3
-(a/defcase day3 "2018/3.input.txt" input)
+;utils
+(defn re-extract
+  [regex]
+  (fn [txt] (rest (re-find regex txt))))
+
+(def rect-pattern (re-extract #"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)"))
+
+(defn rect
+  [txt]
+  (let [[_ x y width height] (rect-pattern txt)]
+    ({
+      :x (Integer/parseInt x)
+      :y (Integer/parseInt y)
+      :x2 (+ (Integer/parseInt x) (Integer/parseInt width))
+      :y2 (+ (Integer/parseInt y) (Integer/parseInt width))})))
+
+(a/defcase day3 "2018/3.mock.txt" input
+  (let [rects (set (map #(rect %) input))
+        width (max (map :x2 rects))
+        height (max (map :y2 rects))]
+    [width height]))

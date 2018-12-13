@@ -15,3 +15,12 @@
                       io/reader
                       line-seq)]
        ~body)))
+(defmacro debug
+  "Utility to debug an expression, usage:
+      (debug + 5 6) ;evaluate to 11
+      ;(+ 5 6) 11
+  "
+  [& expr]
+  `(let [res ~expr]
+     (println (quote ~expr) res)
+     res))
