@@ -25,9 +25,8 @@
   ([a] a)
   ([[p1 p2] [m1 m2]]
    [(+ p1 m1) (+ p2 m2)]))
-(defn bool->int
-  [b]
-  (if b 1 0))
+
+(defn bool->int [b] (if b 1 0))
 
 
 (a/defcase day2 "2018/2.input.txt" input
@@ -44,3 +43,27 @@
           sum-pair
           input)]
     (* twos threes)))
+
+;utils
+(defn diff
+  [seq1 seq2]
+  (map
+    (fn [[d _]] d)
+    (filter
+      (fn [[s1 s2]] (not= s1 s2))
+      (map vector
+        seq1
+        seq2))))
+
+
+(a/defcase day2-part2 "2018/2.input.txt" input
+  (loop [[word & words] (map seq input)]
+    (let [diff-char
+          (first
+            (filter #(= 1 (count %))
+              (map #(diff word %) words)))]
+      (if (not (nil? diff-char))
+        (do
+          (println (apply str word) (apply str diff-char))
+          (.replaceFirst (apply str word) (apply str diff-char) ""))
+        (recur words)))))
