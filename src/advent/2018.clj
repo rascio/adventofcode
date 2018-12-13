@@ -7,6 +7,7 @@
   (reduce +
       (map #(Integer/parseInt %) input)))
 
+
 (a/defcase day1-part2 "2018/1.input.txt" input
   (let [seq (cycle
               (map #(Integer/parseInt %) input))]
@@ -18,11 +19,9 @@
           res
           (recur tail res (conj history res)))))))
 
+
+
 ;https://adventofcode.com/2018/day/2
-<<<<<<< HEAD
-(a/defcase day2 "2018/2.input.txt"
-  (println (first (line-seq (io/reader *in*)))))
-=======
 ; utils
 (defn sum-pair
   ([] [0 0])
@@ -48,27 +47,28 @@
           input)]
     (* twos threes)))
 
+
 ;utils
 (defn diff
-  [seq1 seq2]
-  (map
-    (fn [[d _]] d)
-    (filter
-      (fn [[s1 s2]] (not= s1 s2))
-      (map vector
-        seq1
-        seq2))))
+  ([seq1 seq2]
+   (->> (map vector seq1 seq2)
+        (keep (fn [[s1 s2]] (not= s1 s2))))))
 
 
 (a/defcase day2-part2 "2018/2.input.txt" input
   (loop [[word & words] (map seq input)]
-    (let [diff-char
-          (first
-            (filter #(= 1 (count %))
-              (map #(diff word %) words)))]
+    (let [diff-char (->> words
+                      (map #(diff word %))
+                      (filter #(= 1 (count (filter identity %))))
+                      first)]
       (if (not (nil? diff-char))
-        (do
-          (println (apply str word) (apply str diff-char))
-          (.replaceFirst (apply str word) (apply str diff-char) ""))
+        (->> (map vector word diff-char)
+             (filter (comp not second))
+             (map first)
+             (apply str))
         (recur words)))))
->>>>>>> c7fbcb91172808bfcd2c81a60b093c26e8c2803e
+
+
+
+;https://adventofcode.com/2018/day/3
+(a/defcase day3 "2018/3.input.txt" input)
