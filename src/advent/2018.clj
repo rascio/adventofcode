@@ -21,5 +21,6 @@
           res
           (recur tail res (conj history res)))))))
 
+;https://adventofcode.com/2018/day/2
 (a/defcase day2 "2018/2.input.txt"
   (println (first (line-seq (io/reader *in*)))))
