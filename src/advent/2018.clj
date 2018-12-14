@@ -91,9 +91,16 @@
       :x2 (+ (Integer/parseInt x) (Integer/parseInt width))
       :y2 (+ (Integer/parseInt y) (Integer/parseInt height))}))
 
+(defn matrix
+  [w h]
+  (into []
+    (map
+      #(vec (repeat % 0))
+      (repeat h w))))
 
 (a/defcase day3 "2018/3.mock.txt" input
   (let [rects (set (map #(rect %) input))
         width (apply max (map :x2 rects))
-        height (apply max (map :y2 rects))]
-    [width height]))
+        height (apply max (map :y2 rects))
+        matrix (matrix width height)]
+    matrix))
