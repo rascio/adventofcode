@@ -79,22 +79,21 @@
 ;https://adventofcode.com/2018/day/3
 ;utils
 (defn re-extract
-  [regex]
-  (fn [txt] (rest (re-find regex txt))))
-
-(def rect-pattern (re-extract #"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)"))
+  [regex txt] (rest (re-find regex txt)))
 
 (defn rect
   [txt]
-  (let [[_ x y width height] (rect-pattern txt)]
-    ({
+  (let [[_ x y width height]
+        (re-extract #"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)" txt)]
+    {
       :x (Integer/parseInt x)
       :y (Integer/parseInt y)
       :x2 (+ (Integer/parseInt x) (Integer/parseInt width))
-      :y2 (+ (Integer/parseInt y) (Integer/parseInt width))})))
+      :y2 (+ (Integer/parseInt y) (Integer/parseInt height))}))
+
 
 (a/defcase day3 "2018/3.mock.txt" input
   (let [rects (set (map #(rect %) input))
-        width (max (map :x2 rects))
-        height (max (map :y2 rects))]
+        width (apply max (map :x2 rects))
+        height (apply max (map :y2 rects))]
     [width height]))
