@@ -7,7 +7,7 @@
       (defcase test \"position/in/classpath.txt\" seq-file
           (println (first seq-file)) ;Prints the first line of the file
   "
-  [name file input body]
+  [name [input file] body]
   `(defn ~name []
      (let [~input (->> ~file
                       io/resource

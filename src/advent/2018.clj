@@ -1,15 +1,20 @@
 (ns advent.2018
   (:require [advent.core :as a]
-            [clojure.core.reducers :as r]))
+            [clojure.core.reducers :as r])
+  (:import (java.time
+             LocalDateTime
+             format.DateTimeFormatter)))
 
 ;https://adventofcode.com/2018/day/1
-(a/defcase day1 "2018/1.input.txt" input
+(a/defcase day1
+  [input "2018/1.input.txt"]
   (reduce +
       (map #(Integer/parseInt %) input)))
 
 
 
-(a/defcase day1-part2 "2018/1.input.txt" input
+(a/defcase day1-part2
+  [input "2018/1.input.txt"]
   (let [seq (cycle
               (map #(Integer/parseInt %) input))]
     (loop [[n & tail] seq
@@ -28,14 +33,15 @@
 ; utils
 (defn sum-pair
   ([] [0 0])
-  ([a] a)
+  ([p] p)
   ([[p1 p2] [m1 m2]]
    [(+ p1 m1) (+ p2 m2)]))
 
 (defn bool->int [b] (if b 1 0))
 
 
-(a/defcase day2 "2018/2.input.txt" input
+(a/defcase day2
+  [input "2018/2.input.txt"]
   (let [[twos threes]
         (transduce
           (comp
@@ -59,7 +65,8 @@
         (keep (fn [[s1 s2]] (not= s1 s2))))))
 
 
-(a/defcase day2-part2 "2018/2.input.txt" input
+(a/defcase day2-part2
+  [input "2018/2.input.txt"]
   (loop [[word & words] (map seq input)]
     (let [diff-char (->> words
                       (map #(diff word %))
@@ -103,7 +110,8 @@
   (assoc-in matrix point (f (get-in matrix point))))
 
 
-(a/defcase day3 "2018/3.input.txt" input
+(a/defcase day3
+  [input "2018/3.input.txt"]
   (let [rects (set (map #(rect %) input))
         width (apply max (map :x2 rects))
         height (apply max (map :y2 rects))]
@@ -132,9 +140,33 @@
     (<= (:y2 r1) (:y r2))))
 
 
-(a/defcase day3-part2 "2018/3.input.txt" input
+(a/defcase day3-part2
+  [input "2018/3.input.txt"]
   (let [rects (set (map rect input))]
     (filter
       (fn [rect]
         (every? (not-overlap? rect) (disj rects rect)))
       rects)))
+
+
+
+
+
+;https://adventofcode.com/2018/day/4
+(defn guard-event
+  [date txt]
+  {:date date :txt txt})
+
+(defn log->event
+  [log]
+  (let [[log-time log-message] (re-extract #"^\[(.+?)\] (.+?)$" log)
+        time (LocalDateTime/parse log-time log-time-format)]
+    (guard-event time log-message)))
+
+(def log-time-format (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
+
+(a/defcase day3-part2
+  [input "2018/4.mock.txt"]
+  (->> input
+    (map log->event)
+    (sort-by :date)))
