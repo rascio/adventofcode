@@ -83,9 +83,10 @@
 
 (defn rect
   [txt]
-  (let [[_ x y width height]
+  (let [[id x y width height]
         (re-extract #"#(\d+) @ (\d+),(\d+): (\d+)x(\d+)" txt)]
     {
+      :id id
       :x (Integer/parseInt x)
       :y (Integer/parseInt y)
       :x2 (+ (Integer/parseInt x) (Integer/parseInt width))
@@ -93,14 +94,47 @@
 
 (defn matrix
   [w h]
-  (into []
-    (map
-      #(vec (repeat % 0))
-      (repeat h w))))
+  (->> (repeat h w)
+       (map #(vec (repeat % 0)))
+       (into [])))
 
-(a/defcase day3 "2018/3.mock.txt" input
+(defn map-point
+  [f matrix point]
+  (assoc-in matrix point (f (get-in matrix point))))
+
+
+(a/defcase day3 "2018/3.input.txt" input
   (let [rects (set (map #(rect %) input))
         width (apply max (map :x2 rects))
-        height (apply max (map :y2 rects))
-        matrix (matrix width height)]
-    matrix))
+        height (apply max (map :y2 rects))]
+    (->> rects
+      (reduce ;to a matrix with counters
+        (fn [area rect]
+          (reduce
+            (partial map-point inc)
+            area
+            (for [x (range (:x rect) (:x2 rect))
+                  y (range (:y rect) (:y2 rect))]
+              [x y])))
+        (matrix width height))
+      (flatten)
+      (filter (partial < 1))
+      (count))))
+
+
+
+(a/deflambda not-overlap?
+  [r1 r2]
+  (or
+    (>= (:x r1) (:x2 r2))
+    (<= (:x2 r1) (:x r2))
+    (>= (:y r1) (:y2 r2))
+    (<= (:y2 r1) (:y r2))))
+
+
+(a/defcase day3-part2 "2018/3.input.txt" input
+  (let [rects (set (map rect input))]
+    (filter
+      (fn [rect]
+        (every? (not-overlap? rect) (disj rects rect)))
+      rects)))
