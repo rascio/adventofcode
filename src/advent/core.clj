@@ -23,7 +23,13 @@
   "
   [& expr]
   `(let [res# ~expr]
-    (println (quote ~expr) res#)
+    (println "Debug:" (first (quote ~expr)))
+    (println (quote ~expr))
+    (println "aruments:")
+    (println ~@(rest expr))
+    (println "result:")
+    (println res#)
+    (println "------------")
     res#))
 
 (defmacro deflambda

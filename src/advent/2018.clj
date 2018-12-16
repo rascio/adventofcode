@@ -62,7 +62,7 @@
 (defn diff
   ([seq1 seq2]
    (->> (map vector seq1 seq2)
-        (keep (fn [[s1 s2]] (not= s1 s2))))))
+        (map (fn [[s1 s2]] (not= s1 s2))))))
 
 
 (a/defcase day2-part2
@@ -73,6 +73,7 @@
                       (filter #(= 1 (count (filter identity %))))
                       first)]
       (if (not (nil? diff-char))
+        ;word found, now get the common part
         (->> (map vector word diff-char)
              (filter (comp not second))
              (map first)
@@ -118,7 +119,7 @@
     (->> rects
       (reduce ;to a matrix with counters
         (fn [area rect]
-          (reduce
+          (reduce ;the points of the rectangle in counters
             (partial map-point inc)
             area
             (for [x (range (:x rect) (:x2 rect))
@@ -150,12 +151,18 @@
 
 
 
-
-
 ;https://adventofcode.com/2018/day/4
 (defn guard-event
   [date txt]
-  {:date date :txt txt})
+  (condp re-matches txt
+    #"Guard #(\d+) begins shift" :>>
+         (fn [[_ id]] {:type :start :date date :id id})
+    #"falls asleep" :>>
+         (fn [_] {:type :asleep :date date})
+    #"wakes up" :>>
+         (fn [_] {:type :awake :date date})
+    {:type :invalid :txt txt}))
+
 
 (defn log->event
   [log]
@@ -165,8 +172,39 @@
 
 (def log-time-format (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
 
-(a/defcase day3-part2
+(defn to-idx
+  [events time]
+  [(-> events :start :id)
+   (.getYear time)
+   (.getMonth time)
+   (.getDayOfMonth time)
+   (.getHour time)
+   (.getMinute time)])
+
+(defn logs->events
+  [logs]
+  (->> logs
+    (group-by :type)
+    (reduce
+      (fn [m [k [v]]] (assoc m k v))
+      {})))
+
+(defn events->timetable
+  [events]
+  (reduce
+    (fn [res time]
+      (let [idx (to-idx events time)]
+        (assoc-in res idx (inc (get-in res idx 0)))))
+    {}
+    (->> (iterate #(.plusMinutes % 1) (-> events :asleep :date))
+         (take-while (comp not neg? (partial compare (-> events :awake :date)))))))
+
+
+(a/defcase day4
   [input "2018/4.mock.txt"]
   (->> input
     (map log->event)
-    (sort-by :date)))
+    (sort-by :date)
+    (partition 3)
+    (map logs->events)
+    (map events->timetable)))
