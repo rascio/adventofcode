@@ -156,30 +156,24 @@
   [date txt]
   (condp re-matches txt
     #"Guard #(\d+) begins shift" :>>
-         (fn [[_ id]] {:type :start :date date :id id})
+         (fn [[_ id]] {:type :start :date date :id (Integer/parseInt id)})
     #"falls asleep" :>>
          (fn [_] {:type :asleep :date date})
     #"wakes up" :>>
          (fn [_] {:type :awake :date date})
     {:type :invalid :txt txt}))
 
+(def log-time-format (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
+
+(defn format
+  [time format]
+  (.format time (DateTimeFormatter/ofPattern format)))
 
 (defn log->event
   [log]
   (let [[log-time log-message] (re-extract #"^\[(.+?)\] (.+?)$" log)
         time (LocalDateTime/parse log-time log-time-format)]
     (guard-event time log-message)))
-
-(def log-time-format (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
-
-(defn to-idx
-  [events time]
-  [(-> events :start :id)
-   (.getYear time)
-   (.getMonth time)
-   (.getDayOfMonth time)
-   (.getHour time)
-   (.getMinute time)])
 
 (defn logs->events
   [logs]
@@ -189,22 +183,102 @@
       (fn [m [k [v]]] (assoc m k v))
       {})))
 
-(defn events->timetable
-  [events]
+(defn range->minutes
+  [start stop]
   (reduce
     (fn [res time]
-      (let [idx (to-idx events time)]
-        (assoc-in res idx (inc (get-in res idx 0)))))
+      (let [idx    (format time "dd-MM-yyyy")
+            minute (format time "HH:mm")]
+        (assoc res idx (cons minute (get res idx '())))))
     {}
-    (->> (iterate #(.plusMinutes % 1) (-> events :asleep :date))
-         (take-while (comp not neg? (partial compare (-> events :awake :date)))))))
+    (->> (iterate #(.plusMinutes % 1) start)
+         (take-while (comp pos? (partial compare stop))))))
+
+(defn events->timetable
+  [e]
+  (loop [[event & others] e
+         last nil
+         res {}]
+    (if (nil? event)
+      res
+      (case (event :type)
+        :awake (let [from     (last :date)
+                     id       (last :id)
+                     to       (event :date)
+                     minutes  (range->minutes from to)]
+                 (recur others event
+                   (update res id
+                     (partial merge-with clojure.set/union minutes))))
+        (recur others event res)))))
+
+(defn timetable->stats
+  [timetable]
+  (reduce
+    (fn [res [id days]]
+      (reduce
+        (fn [r [day minutes]]
+          (reduce
+            #(assoc-in %1 [id %2] (inc (get-in %1 [id %2] 0)))
+            r
+            minutes))
+        res
+        days))
+    {}
+    timetable))
+
+(defn mn->int
+  [minute]
+  (Integer/parseInt (second (re-matches #"\d\d:(\d\d)" minute))))
 
 
 (a/defcase day4
-  [input "2018/4.mock.txt"]
-  (->> input
-    (map log->event)
-    (sort-by :date)
-    (partition 3)
-    (map logs->events)
-    (map events->timetable)))
+  [input "2018/4.input.txt"]
+  (let [
+        events (->> input
+                 (map log->event)
+                 (sort-by :date)
+                 (assign-id))
+        timetable (events->timetable events)
+        stats (timetable->stats timetable)
+        [guard-id
+         guard-stats] (->> stats
+                        (sort-by
+                          (comp
+                            (partial reduce + 0)
+                            (partial map second)
+                            second)
+                          >)
+                        first)
+        best-minute (first (sort-by second > guard-stats))]
+    (println "Result:" guard-id best-minute (* guard-id (mn->int (key best-minute))))))
+
+
+(defn most-sleeped-minute
+  [stats]
+  (->> stats
+    (reduce
+      (partial merge-with + res minutes)
+      {})
+    (sort-by second >)
+    (first)
+    (key)
+    (mn->int)))
+
+
+(a/defcase day4-part2
+  [input "2018/4.input.txt"]
+  (let [
+        events (->> input
+                 (map log->event)
+                 (sort-by :date)
+                 (assign-id))
+        timetable (events->timetable events)
+        stats (timetable->stats timetable)
+        result (->> stats
+                 (map
+                  (fn [[id & days]]
+                     {:id id
+                       :minute (most-sleeped-minute days)}))
+                 (sort-by :minute >)
+                 (first))]
+    (println "Result:" result (* (result :id) (result :minute)))))
