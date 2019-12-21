@@ -71,4 +71,4 @@
 
 (a/defcase day-3
     [input "2019/day3.txt"]
-    ())
+    (comment to-do))
