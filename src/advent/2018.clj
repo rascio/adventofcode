@@ -235,9 +235,8 @@
   [input "2018/4.input.txt"]
   (let [
         events (->> input
-                 (map log->event)
-                 (sort-by :date)
-                 (assign-id))
+                 (sort)
+                 (map log->event))
         timetable (events->timetable events)
         stats (timetable->stats timetable)
         [guard-id
@@ -257,7 +256,7 @@
   [stats]
   (->> stats
     (reduce
-      (partial merge-with + res minutes)
+      (partial merge-with +)
       {})
     (sort-by second >)
     (first)
@@ -269,9 +268,9 @@
   [input "2018/4.input.txt"]
   (let [
         events (->> input
+                 (sort)
                  (map log->event)
-                 (sort-by :date)
-                 (assign-id))
+                 (sort-by :date))
         timetable (events->timetable events)
         stats (timetable->stats timetable)
         result (->> stats

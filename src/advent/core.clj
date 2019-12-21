@@ -22,15 +22,24 @@
                     ;evaluate to 11
   "
   [& expr]
-  `(let [res# ~expr]
-    (println "Debug:" (first (quote ~expr)))
-    (println (quote ~expr))
-    (println "aruments:")
-    (println ~@(rest expr))
-    (println "result:")
-    (println res#)
-    (println "------------")
-    res#))
+  `(try 
+        (let [res# ~expr]
+            (println "Debug:" (first (quote ~expr)))
+            (println (quote ~expr))
+            (println "aruments:")
+            (println ~@(rest expr))
+            (println "result:")
+            (println res#)
+            (println "------------")
+            res#)
+        (catch Exception e#
+            (println "Debug:" (first (quote ~expr)))
+            (println (quote ~expr))
+            (println "aruments:")
+            (println ~@(rest expr))
+            (println "error:")
+            (println e#)
+            (println "------------"))))
 
 (defmacro deflambda
   "define a function whith currying:
