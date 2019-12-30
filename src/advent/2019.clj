@@ -157,30 +157,51 @@
 ;Day5
 (a/defcase day5
     [input "2019/day5.txt"
-     read-arg (fn [state v mode]
-                (if (zero? mode)
-                    (get-in state [:memory v])
-                    v))
+     ID 5 ;1 day5-1 5 day5-2
      process (fn [state]
-                (let [[code & [arg0 arg1 arg2]] (subvec (state :memory) 
-                                                        (state :index) 
-                                                        (min (+ (state :index) 4)
-                                                            (count (state :memory))))
+                (comment println "DEBUG:" state)
+                (let [code (get-in state [:memory (state :index)])
                       op (mod code 100)
-                      [m0 m1 m2] [(quot (mod code 1000) 100)
-                                  (quot (mod code 10000) 1000)
-                                  (quot (mod code 100000) 10000)]]
+                      modes (fn [idx] (-> (mod code (Math/pow 10 (+ 3 idx)))
+                                          (quot (Math/pow 10 (+ 2 idx)))
+                                          (int)))
+                      arg (fn [idx] (get-in state [:memory (+ (inc idx) (state :index))]))
+                      read-arg (fn [idx] 
+                                 (as-> (arg idx) v
+                                    (if (zero? (modes idx))
+                                        (get-in state [:memory v])
+                                        v)))]
                     (case op
-                        1 (-> (assoc-in state [:memory arg2] (+ (read-arg state arg0 m0) 
-                                                                (read-arg state arg1 m1)))
-                              (update :index #(+ 4 %)))
-                        2 (-> (assoc-in state [:memory arg2] (* (read-arg state arg0 m0) 
-                                                                (read-arg state arg1 m1)))
-                              (update :index #(+ 4 %)))
-                        3 (-> (assoc-in state [:memory arg0] 1) ;1 == (read-line)
-                              (update :index #(+ 2 %)))
-                        4 (do (println (get-in state [:memory arg0]))
-                              (update state :index #(+ 2 %)))
+                        1 (-> (assoc-in state [:memory (arg 2)] (+ (read-arg 0) 
+                                                                   (read-arg 1)))
+                              (update :index + 4))
+                        2 (-> (assoc-in state [:memory (arg 2)] (* (read-arg 0) 
+                                                                   (read-arg 1)))
+                              (update :index + 4))
+                        3 (-> (assoc-in state [:memory (arg 0)] ID) ;ID == (read-line)
+                              (update :index + 2))
+                        4 (do (println (read-arg 0))
+                              (update state :index + 2))
+                        5 (->> (if (not= 0 (read-arg 0))
+                                   (read-arg 1)
+                                   (+ 3 (state :index)))
+                               (assoc state :index))
+                        6 (->> (if (= 0 (read-arg 0))
+                                   (read-arg 1)
+                                   (+ 3 (state :index)))
+                               (assoc state :index))
+                        7 (-> (assoc-in state 
+                                        [:memory (arg 2)] 
+                                        (if (< (read-arg 0) (read-arg 1)) 
+                                            1 
+                                            0))
+                              (update :index + 4))
+                        8 (-> (assoc-in state 
+                                        [:memory (arg 2)] 
+                                        (if (= (read-arg 0) (read-arg 1))
+                                            1
+                                            0))
+                              (update :index + 4))
                         99 (assoc state :index -1)
                         (throw (ex-info "Not managed" {:value op})))))                  
      compute (fn [instructions]
@@ -190,7 +211,9 @@
                         (swap! state process))
                     @state))]
     (let [res (->> input
-                   (mapcat #(clojure.string/split % #","))
-                   (map str->int)
-                   (vec)
-                   (compute))]))
+                   (map #(->> (clojure.string/split % #",")
+                              (map str->int)
+                              (vec)
+                              (compute)))
+                              ;(println "res")))
+                   (doall))]))
