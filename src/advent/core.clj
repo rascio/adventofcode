@@ -7,14 +7,15 @@
       (defcase test \"position/in/classpath.txt\" seq-file
           (println (first seq-file)) ;Prints the first line of the file
   "
-  [name [input file] body]
+  [name [input file & utils] & body]
   `(defn ~name []
      (let [~input (->> ~file
                       io/resource
                       io/input-stream
                       io/reader
-                      line-seq)]
-       ~body)))
+                      line-seq)
+            ~@utils]
+       ~@body)))
 
 (defmacro debug
   "Utility to debug an expression, usage:
