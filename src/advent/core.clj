@@ -1,6 +1,40 @@
 (ns advent.core
   (:require [clojure.java.io :as io]))
 
+(defn pdebug [msg x] (println msg x) x)
+
+(defn debugger [active]
+    (if active
+        (fn [& args]
+            (println (clojure.string/join " " args))
+            (last args))
+        (fn [& args] (last args))))
+
+(defn str->int [s] (Integer/parseInt (str s)))
+(defn str->long [s] (Long/parseLong (str s)))
+
+(defn append [coll i v]
+   (as-> (count coll) acc
+         (- i acc)
+         (if (pos? acc)
+            (-> coll
+                (concat (repeat acc 0))
+                (vec))
+            coll)
+         (assoc acc i v)))
+
+(defn read-input [year day]
+    (fn ([] (->> (str year "/day" day ".txt")
+                io/resource
+                io/input-stream
+                io/reader
+                line-seq))
+        ([v] (->> (str year "/day" day "-" v ".txt")
+                io/resource
+                io/input-stream
+                io/reader
+                line-seq))))
+
 (defmacro defcase
   "Define a function letting the `input` a seq with
   the content of the `file` read from classpath, eg:
