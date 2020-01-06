@@ -3,6 +3,10 @@
 
 (defn pdebug [msg x] (println msg x) x)
 
+(defn >>debug [msg f arg]
+   (pdebug msg (f arg))
+   arg)
+
 (defn debugger [active]
     (if active
         (fn [& args]
@@ -24,16 +28,16 @@
          (assoc acc i v)))
 
 (defn read-input [year day]
-    (fn ([] (->> (str year "/day" day ".txt")
-                io/resource
-                io/input-stream
-                io/reader
-                line-seq))
-        ([v] (->> (str year "/day" day "-" v ".txt")
-                io/resource
-                io/input-stream
-                io/reader
-                line-seq))))
+   (fn ([] (->> (str year "/day" day ".txt")
+               io/resource
+               io/input-stream
+               io/reader
+               line-seq))
+      ([v] (->> (str year "/day" day "-" v ".txt")
+               io/resource
+               io/input-stream
+               io/reader
+               line-seq))))
 
 (defmacro defcase
   "Define a function letting the `input` a seq with

@@ -5,7 +5,7 @@
               [clojure.core.async :as async]))
 
 (def reader (a/read-input 2019 9))
-(def debug (a/debugger true))
+(def debug (a/debugger false))
 
 (def input (reader))
 (comment def input '("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"))
@@ -128,6 +128,19 @@
                            (vec))
          chan (compute "0" instructions in out)]
         (do (async/put! in 1)
+            (println "process:" (async/<!! chan))
+            (async/<!! (async/into [] out))
+ 
+            (ex-data e))))
+         
+(defn part-2 []
+   (let [in (async/chan)
+         out (async/chan)
+         instructions (->> (clojure.string/split (first input) #",")
+                           (map a/str->long)
+                           (vec))
+         chan (compute "0" instructions in out)]
+        (do (async/put! in 2)
             (println "process:" (async/<!! chan))
             (async/<!! (async/into [] out)))))
  
