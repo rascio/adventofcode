@@ -16,7 +16,11 @@
 
 (defn str->int [s] (Integer/parseInt (str s)))
 (defn str->long [s] (Long/parseLong (str s)))
-
+(defn round [n decimals]
+   (let [m (Math/pow 10 decimals)]
+      (-> (* n m)
+          (int)
+          (/ m))))
 (defn append [coll i v]
    (as-> (count coll) acc
          (- i acc)
