@@ -1,4 +1,4 @@
-(ns advent.2019-day4
+(ns advent.2019.day4
     (:require [advent.core :as a]
               [clojure.spec.alpha :as s]))
 

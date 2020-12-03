@@ -1,18 +1,13 @@
-(ns advent.2019-day9
+(ns advent.2019.day11
     (:require [advent.core :as a]
               [clojure.spec.alpha :as s]
               [clojure.math.combinatorics :as comb]
               [clojure.core.async :as async]))
 
-(def reader (a/read-input 2019 9))
+(def reader (a/read-input 2019 11))
 (def debug (a/debugger false))
 
 (def input (reader))
-(comment def input '("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"))
-(comment def input '("1102,34915192,34915192,7,4,7,99,0"))
-(comment def input '("104,1125899906842624,99"))
-(comment def input '("3,0,1001,2,1,0,4,0,99,-1"))
-(comment def input '("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"))
 
 (defprotocol Args
    (read [this pos])
@@ -101,8 +96,8 @@
                (debug "There was an error" (.getMessage e))
                {:op (current-operator args) :state state :cause e})))))
 
-(defn compute [conf instructions in out]
-    (debug "compute:" conf (count instructions) in out)
+(defn int-code-eval [conf instructions in out]
+    (debug "int-code-eval:" conf (count instructions) in out)
     (async/go
       (try
          (loop [state {:id conf
@@ -119,28 +114,91 @@
          (catch Exception e
             (debug conf "ERROR\n" (.getMessage e) "\n=>" (ex-data e))
             (ex-data e)))))
-         
+
+(defn polar->cartesian [r d]
+   (let [radians (a/round (Math/toRadians d) 1)]
+      (->> [(Math/cos radians) (Math/sin radians)]
+         (map (partial * r))
+         (map #(Math/round %)))))
+
+(def rotation {0 -90 1 90})
+(defn robot [in out & {init :init :or {init 0}}]
+   (async/go-loop [painted {[0 0] init}
+                   index [0 0]
+                   degree -90]
+      (debug "robot-loop" index degree)
+      (async/put! out (get painted index 0))
+      (debug "waiting")
+      (let [paint (async/<! in)
+            rotate (async/<! in)]
+         (debug "robot>" paint rotate)
+         (if (nil? paint)
+            painted
+            (as-> (+ degree (rotation rotate)) new-angle
+               (recur 
+                  (assoc painted index paint)
+                  (vec (map + index (polar->cartesian 1 new-angle)))
+                  new-angle))))))
+
+
 (defn part-1 []
    (let [in (async/chan)
          out (async/chan)
          instructions (->> (clojure.string/split (first input) #",")
                            (map a/str->long)
                            (vec))
-         chan (compute "0" instructions in out)]
-        (do (async/put! in 1)
-            (println "process:" (async/<!! chan))
-            (async/<!! (async/into [] out))
- 
-            (ex-data e))))
-         
+         robot (robot out in)
+         program (int-code-eval "0" instructions in out)]
+        (do (debug "process:" (async/<!! program)
+               (async/<!! (async/into [] out)))
+            (->> (async/<!! robot)
+                 (count)))))
+
+(defn abs [n]
+   (int (Math/abs n)))
+(def distance (comp abs -))
+
+(defn print-drawing [points]
+   (let [[max-x min-x max-y min-y] (reduce 
+                                    (fn [[xmax xmin ymax ymin] [[x y] _]] 
+                                       [(max xmax x) (min xmin x) 
+                                        (max ymax y) (min ymin y)])
+                                    [0 Integer/MAX_VALUE 0 Integer/MAX_VALUE]
+                                    points)
+         vec-of (fn [n x] (vec (repeat (inc n) x)))
+         w (distance min-x max-x)
+         h (distance min-y max-y)
+         shift-y (abs min-y)
+         shift-x (abs min-x)
+         matrix (vec-of h (vec-of w " "))]
+      (->> points
+         (reduce (fn [acc [[x y] paint]]
+                   (update acc (+ shift-y y) a/append (+ shift-x x) ({0 " " 1 "█"} paint)))
+               matrix)
+         (map clojure.string/join)
+         (map println)
+         (doall))))
+
 (defn part-2 []
    (let [in (async/chan)
          out (async/chan)
          instructions (->> (clojure.string/split (first input) #",")
                            (map a/str->long)
                            (vec))
-         chan (compute "0" instructions in out)]
-        (do (async/put! in 2)
-            (println "process:" (async/<!! chan))
-            (async/<!! (async/into [] out)))))
- 
+         robot (robot out in :init 1)
+         program (int-code-eval "0" instructions in out)]
+        (do (debug "process:" (async/<!! program)
+               (async/<!! (async/into [] out)))
+            (->> (async/<!! robot)
+                 (print-drawing)))))
+
+(defn test-robot [& args]
+   (let [in (async/chan)
+         out (async/chan)
+         robot (robot in out)]
+      (->> (map (partial async/put! in) args)
+           (doall))
+      (debug "Sent all inputs")
+      (async/close! in)
+      (->> (async/<!! robot)
+         (print-drawing))))

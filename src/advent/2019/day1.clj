@@ -1,4 +1,4 @@
-(ns advent.2019-day1
+(ns advent.2019.day1
     (:require [advent.core :as a]))
 
 (def reader (a/read-input 2019 1))
@@ -18,7 +18,7 @@
         (if (neg? f)
             0
             (+ f (fuel f)))))
-(defn part-2
+(defn part-2 []
     (->> input
         (map (comp fuel a/str->int))
         (reduce +)))

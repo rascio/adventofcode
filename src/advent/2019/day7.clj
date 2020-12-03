@@ -1,4 +1,4 @@
-(ns advent.2019-day7
+(ns advent.2019.day7
     (:require [advent.core :as a]
               [clojure.spec.alpha :as s]
               [clojure.math.combinatorics :as comb]

@@ -1,4 +1,4 @@
-(ns advent.2019-day5
+(ns advent.2019.day5
     (:require [advent.core :as a]))
 
 (def reader (a/read-input 2019 5))

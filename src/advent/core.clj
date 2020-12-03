@@ -21,6 +21,14 @@
       (-> (* n m)
           (int)
           (/ m))))
+(defn seq-fn [f values]
+  (->> values
+       (map-indexed
+        (fn [idx v]
+          (let [f' (or (get f idx)
+                       identity)]
+            (f' v))))))
+
 (defn append [coll i v]
    (as-> (count coll) acc
          (- i acc)
