@@ -1,5 +1,6 @@
 (ns advent.core
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]))
 
 (defn pdebug [msg x] (println msg x) x)
 
@@ -10,7 +11,7 @@
 (defn debugger [active]
     (if active
         (fn [& args]
-            (println (clojure.string/join " " args))
+            (println (s/join " " args))
             (last args))
         (fn [& args] (last args))))
 

@@ -1,6 +1,5 @@
 (ns advent.2020.day5
-  (:require [advent.core :as a]
-            [clojure.set :as sets]))
+  (:require [advent.core :as a]))
 
 (def reader (a/read-input 2020 5))
 
