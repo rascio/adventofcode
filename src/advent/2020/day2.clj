@@ -18,7 +18,7 @@
 (defn part1 []
   (->> input
        (map #(rest (re-matches #"(\d+)-(\d+) (\w+): (\w+)" %)))
-       (map #(a/seq-fn [a/str->int a/str->int ->char] %))
+       (map (a/seq-map a/str->int a/str->int ->char))
        (filter (fn [[min max c psw]]
                  (->> psw
                       (filter #(= c %))
@@ -33,7 +33,7 @@
 (defn part2 []
   (->> input
        (map #(rest (re-matches #"(\d+)-(\d+) (\w+): (\w+)" %)))
-       (map #(a/seq-fn [a/str->int a/str->int ->char] %))
+       (map (a/seq-map a/str->int a/str->int ->char))
        (filter (fn [[idx' idx'' c psw]]
                  (let [c' (= c (get psw (dec idx')))
                        c'' (= c (get psw (dec idx'')))]
