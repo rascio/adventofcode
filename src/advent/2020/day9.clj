@@ -32,17 +32,15 @@
 (def target (part1))
 
 (defn break-xmas [[n & numbers]]
-  (let [check (loop [[n' & nums] numbers
-                     acc n
-                     res [n]]
-                (cond
-                  (nil? n') nil
-                  (< target (+ acc n')) nil
-                  (= target (+ acc n')) (cons n' res)
-                  :else (recur nums (+ acc n') (cons n' res))))]
-    (if (nil? check)
-      (break-xmas numbers)
-      check)))
+  (or (loop [[n' & nums] numbers
+             acc n
+             res [n]]
+        (cond
+          (nil? n') nil
+          (< target (+ acc n')) nil
+          (= target (+ acc n')) (cons n' res)
+          :else (recur nums (+ acc n') (cons n' res))))
+      (break-xmas numbers)))
 
 (defn part2 []
   (let [contiguous-set (->> input
