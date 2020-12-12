@@ -79,7 +79,8 @@
                              (map a/str->int)
                              (vec)
                              (compute)))
-                  (doall))]))
+                  (doall))]
+     res))
 
 (defn part-2 []
    (reset! ID 5)
@@ -88,5 +89,6 @@
                              (map a/str->int)
                              (vec)
                              (compute)))
-                  (doall))]))
+                  (doall))]
+     res))
 
