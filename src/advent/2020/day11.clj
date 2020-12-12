@@ -19,17 +19,10 @@
 (defn parse-seats [lines]
   (let [matrix (->> lines
                     (mapv #(vec (.toCharArray %)))
-                    (doall))
-        rows (count matrix)
-        cols (count (first matrix))]
+                    (doall))]
     {:matrix matrix 
-     :rows rows
-     :cols cols
-     :seats (for [r (range rows)
-                  c (range cols)
-                  :let [seat (get-in matrix [r c])]
-                  :when (not= FLOOR seat)]
-              [r c])}))
+     :rows (count matrix)
+     :cols (count (first matrix))}))
 
 (defn nearby [{:keys [rows cols]}]
   (fn [next [r c]]
