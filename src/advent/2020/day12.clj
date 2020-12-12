@@ -32,7 +32,7 @@
                  90 [0 -1]
                  180 [-1 0]
                  270 [0 1]})
-(defrecord RelativePosition [direction position]
+(defrecord RelativePosition [position direction]
   Navigation
   (rotate [this degrees]
           (->> (mod (+ direction degrees) 360)
@@ -49,29 +49,28 @@
 (defn part1 []
   (->> input
        (map parse-instruction)
-       (reduce exec (RelativePosition. 0 [0 0]))
+       (reduce exec (RelativePosition. [0 0] 0))
        (:position)
        (manhattan-distance [0 0])))
 
 
 ;Part 2
+(defn coord-rotate [vector degrees]
+   (->> (int (/ (mod degrees 360) 90))
+        (nth (iterate (fn [[x y]] [y (- x)])
+                      vector))
+        (doall)))
 (defrecord WaypointPosition [position waypoint]
   Navigation
   (rotate [this degrees]
-          (->> waypoint
-               (iterate (fn [[x y]] [y (- x)]))
-               (drop (int (/ (mod degrees 360) 90)))
-               (first)
-               (doall)
+          (->> (coord-rotate waypoint degrees)
                (assoc this :waypoint)))
   (move [this vector]
         (->> (map + waypoint vector)
              (assoc this :waypoint)))
   (forward [this times]
-           (->> position
-                (iterate #(map + % waypoint))
-                (drop times)
-                (first)
+           (->> (nth (iterate #(map + % waypoint) position)
+                     times)
                 (doall)
                 (assoc this :position))))
 

@@ -3,20 +3,16 @@
             [clojure.string :as s]))
 
 (def reader (a/read-input 2020 11))
-(def input (reader))
+(def input (reader "example"))
 
 (def EMPTY \L)
 (def OCCUPIED \#)
 (def FLOOR \.)
 
-(defn print-matrix [matrix]
-  (->> (if (map? matrix)
-         (:matrix matrix)
-         matrix)
-       (map s/join)
-       (s/join "\n")
-       (println "\n"))
-  matrix)
+(def directions (for [y [-1 0 1] x [-1 0 1]
+                      :let [pos [x y]]
+                      :when (not= pos [0 0])]
+                     pos))
 
 (defn create-matrix [rows cols]
   (vec (repeatedly rows #(vec (repeat cols 0)))))
@@ -30,11 +26,9 @@
      :rows (count matrix) 
      :cols (count (first matrix))}))
 
-(defn seat-counters-1 [{:keys [rows cols]}]
+(defn nearby [{:keys [rows cols]}]
   (fn [next [r c seat]]
-    (->> (list [(dec r) (dec c)] [(dec r) c] [(dec r) (inc c)]
-               [r (dec c)] [r (inc c)]
-               [(inc r) (dec c)] [(inc r) c] [(inc r) (inc c)])
+    (->> (map #(map + [r c] %) directions)
          (filter (fn [[r' c']] (and (>= (dec rows) r' 0)
                                     (>= (dec cols) c' 0))))
          (reduce (fn [acc [r' c']]
@@ -80,7 +74,7 @@
 (defn part1 []
   (->> input
        (parse-seats)
-       (stabilize {:seat-counters seat-counters-1
+       (stabilize {:seat-counters nearby
                    :max-adjacents 4})
        (count-seats)))
 
@@ -93,11 +87,9 @@
                                     (> cols (second point) -1))))
        (drop-while (fn [point] (= FLOOR (get-in matrix point))))
        (take 1)))
-(defn seat-counters-2 [matrix]
+(defn visible [matrix]
   (fn [counters [r c seat]]
-    (->> [[-1 -1] [0 -1] [1 -1]
-          [-1 0] [1 0]
-          [-1 1] [0 1] [1 1]]
+    (->> directions
          (mapcat #(follow % [r c] matrix))
          (reduce (fn [acc [r' c']]
                    (if (= OCCUPIED seat)
@@ -108,6 +100,6 @@
 (defn part2 []
   (->> input
        (parse-seats)
-       (stabilize {:seat-counters seat-counters-2
+       (stabilize {:seat-counters visible
                    :max-adjacents 5})
        (count-seats)))
