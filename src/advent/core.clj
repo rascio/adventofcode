@@ -2,6 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]))
 
+(defmacro debug-forms [& forms]
+  `(println ~@(mapcat (fn [f] [(str f ":") f]) forms)))
 (defn pdebug [msg x] (println msg x) x)
 
 (defn >>debug [msg f arg]
