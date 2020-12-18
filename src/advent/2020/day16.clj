@@ -44,6 +44,7 @@
          (reduce +))))
 
 
+
 (defn invalid? [ticket rules]
   (->> ticket
        (every? (fn [field]
@@ -57,11 +58,10 @@
          (cons your-ticket)
          (apply map list) ;group field values
          (map (fn [values-of-field]
-                [values-of-field
-                 (->> rules
-                      (filter #(valid-group? values-of-field %))
-                      (map first))]))
-         (map-indexed (fn [idx [_ rules]] [idx rules]))
+                (->> rules
+                     (filter #(valid-group? values-of-field %))
+                     (map first))))
+         (map-indexed list)
          (sort-by (comp count second))
          (reduce (fn [[acc removal] [field rules]]
                    (let [rule (first (if (= 1 (count rules))
