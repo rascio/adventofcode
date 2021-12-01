@@ -17,6 +17,13 @@
             (last args))
         (fn [& args] (last args))))
 
+(defn regex-patterns [str & patterns]
+  (->> (partition 2 patterns)
+       (map (fn [[key value]]
+                 (when-let [match (re-matches value str)]
+                   (cons key match))))
+       (filter #(not (nil? %)))
+       (first)))
 (defn str->int [s] (Integer/parseInt (str s)))
 (defn str->long [s] (Long/parseLong (str s)))
 (defn round [n decimals]
