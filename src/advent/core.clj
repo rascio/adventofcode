@@ -6,6 +6,21 @@
   `(println ~@(mapcat (fn [f] [(str f ":") f]) forms)))
 (defn pdebug [msg x] (println msg x) x)
 
+(defmacro trap 
+  "Used as:
+   (trap :something (/ 5 0))
+   print a message with 'trap=> :something' when the last expression throws an exception
+
+   Can be used to debug error values, like:
+   (map (fn [x] (trap x (/ 5 x))) a-collection)
+   "
+  [& forms]
+  (let [[form & info] (reverse forms)]
+    `(try ~form
+          (catch Exception e#
+            (println "trap=>" ~@info)
+            (throw e#)))))
+
 (defn >>debug [msg f arg]
    (pdebug msg (f arg))
    arg)
