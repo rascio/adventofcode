@@ -32,6 +32,20 @@
             (last args))
         (fn [& args] (last args))))
 
+(defn re-map
+  "Match an transforms regex groups:
+   (re-map #\"(\\d+) (\\d+)\" [str->int (comp inc str->int)] \"5 5\") ;=> (5 6)
+   "
+  ([regex fns]
+   (fn [line] (re-map regex fns line)))
+  ([regex fns line]
+   (->> (re-matches regex line)
+        (rest)
+        (map list fns)
+        (reduce
+         (fn [acc [f v]] (conj acc (f v)))
+         []))))
+
 (defn regex-patterns [str & patterns]
   (->> (partition 2 patterns)
        (map (fn [[key value]]
