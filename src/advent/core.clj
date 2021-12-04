@@ -2,6 +2,9 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]))
 
+(defn pad-left
+  [n string]
+  (apply str (concat (repeat n " ") [string])))
 (defmacro debug-forms [& forms]
   `(println ~@(mapcat (fn [f] [(str f ":") f]) forms)))
 (defn pdebug [msg x] (println msg x) x)
