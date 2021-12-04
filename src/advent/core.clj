@@ -18,7 +18,9 @@
   (let [[form & info] (reverse forms)]
     `(try ~form
           (catch Exception e#
-            (println "trap=>" ~@info)
+            (println "<trap>")
+            ~@(map #(list 'println (str %) %) info)
+            (println "</trap>")
             (throw e#)))))
 
 (defn >>debug [msg f arg]
