@@ -4,7 +4,7 @@
 (def reader (a/read-input 2021 7))
 (def input (->> (reader)
                 (mapcat #(re-seq #"\d+" %))
-                (mapv a/str->int)))
+                (map a/str->int)))
 (def max-pos (apply max input))
 (defn part1 []
   (->> (range 0 (count input))
@@ -30,7 +30,7 @@
               (>= cost min) min
               (nil? crab) cost
               :else (as-> (Math/abs (- crab idx)) $
-                      (int (* (inc $) (/ $ 2)))
+                      (* (inc $) (/ $ 2))
                       (recur others
                              (+ cost $))))))
         Integer/MAX_VALUE)))
