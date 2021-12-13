@@ -4,7 +4,7 @@
               [clojure.math.combinatorics :as comb]
               [clojure.core.async :as async]))
 
-(def reader (a/read-input 2019 6))
+(def reader (a/read-input 2019 7))
 (def debug (a/debugger false))
 
 (def input (reader))
