@@ -131,13 +131,14 @@
             (println "------------")
             res#)
         (catch Exception e#
-            (println "Debug:" (first (quote ~expr)))
-            (println (quote ~expr))
-            (println "aruments:")
-            (println ~@(rest expr))
-            (println "error:")
-            (println e#)
-            (println "------------"))))
+          (println "Debug:" (first (quote ~expr)))
+          (println (quote ~expr))
+          (println "aruments:")
+          (println ~@(rest expr))
+          (println "error:")
+          (println e#)
+          (println "------------")
+          (throw e#))))
 
 (defmacro deflambda
   "define a function whith currying:
