@@ -36,6 +36,8 @@
             (println (s/join " " args))
             (last args))
         (fn [& args] (last args))))
+(defmacro log-forms [log & forms]
+  `(~log ~@(mapcat (fn [f] [(str f ":") f]) forms)))
 
 (defn re-map
   "Match an transforms regex groups:
