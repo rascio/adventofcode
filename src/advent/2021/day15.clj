@@ -75,6 +75,6 @@
            (apply str)
            (println)))))
 (defn part1 []
-  (dijsktra2 [0 0] [(dec H) (dec W)])
+  (dijsktra [0 0] [(dec H) (dec W)])
   #_(-> (min-risk [0 0] [(dec H) (dec W)])
       (get [(dec H) (dec W)])))
