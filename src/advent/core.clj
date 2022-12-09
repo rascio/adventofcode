@@ -2,6 +2,19 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]))
 
+(defmacro when->> 
+  [predicate & forms]
+  (let [[forms [value]] (split-at (dec (count forms)) 
+                                  forms)
+        v-name `value#
+        predicate (if (seq? predicate)
+                    (concat predicate [v-name])
+                    `(~predicate ~v-name))]
+    `(let [~v-name ~value]
+       (if ~predicate
+         (->> ~v-name ~@forms)
+         ~v-name))))
+
 (defn pad-left
   [n string]
   (apply str (concat (repeat n " ") [string])))
