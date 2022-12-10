@@ -1,6 +1,10 @@
 (ns advent.core
   (:require [clojure.java.io :as io]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [clojure.string :as string]
+            [clojure.pprint :as pp]
+            [advent.core :as a])
+  (:import [java.io Console]))
 
 (defmacro when->> 
   [predicate & forms]
@@ -174,3 +178,14 @@
            #(vec (take % args))
            (range 1 (count args))))
      ~(cons args body)))
+
+
+(defn init-day [{:keys [year day]}] 
+  (with-open [file (io/writer (str "src/advent/" year "/day" day ".clj"))]
+    (let [namespace (symbol (string/join "." ["advent" year (str "day" day)]))
+          ns-form (list 'ns namespace '(:require [advent.core :as a]))
+          reader-form (list 'def 'reader (list 'a/read-input year day))
+          input-form '(def input (reader "example"))]
+      (pp/pprint ns-form file)
+      (pp/pprint reader-form file)
+      (pp/pprint input-form file))))
