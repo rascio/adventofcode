@@ -8,10 +8,9 @@
 (def instructions
   {"addx" {:cycles 2
            :args [a/str->int]
-           :fn (fn [state n]
-                 (+ state n))}
+           :fn +}
    "noop" {:cycles 1
-           :fn (fn [state & _] state)}})
+           :fn identity}})
 
 (defn parse-instruction
   [line]
@@ -84,5 +83,5 @@
 (defn part-2 []
   (->> input
        (map parse-instruction)
-       (exec-program)
-       (println)))
+       (exec-program))
+  (println))
