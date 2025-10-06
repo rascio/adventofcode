@@ -77,9 +77,6 @@ object Day10 extends ZIOAppDefault {
         )
         if width.contains(nx) && height.contains(ny)
         if topography(ny)(nx) == v + 1
-        // _ = println(
-        //   s"nx: $nx | ny: $ny | topography(nx)(ny): ${topography(ny)(nx)}"
-        // )
       } yield (nx, ny)
     }
 

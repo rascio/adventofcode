@@ -19,3 +19,5 @@ checkouts/
 .bloop/
 .DS_Store
 settings.json
+zig/zig-out
+zig/.zig-cache
